@@ -5,11 +5,12 @@ contract DatingApp {
     // --- Data Structures ---
 
     struct Profile {
-        string ipfsHash;        // IPFS hash of profile metadata
-        bool verified;          // Verified flag
-        uint256 createdAt;      // Profile creation timestamp
-        uint256 updatedAt;      // Last profile update timestamp
-        bool active;            // Profile active or deleted
+        string ipfsHash;        
+        bool verified;         
+        uint256 createdAt; 
+        uint256 updatedAt;   
+        bool active;        
+        bool isPublic;          
     }
 
     struct Like {
@@ -22,6 +23,12 @@ contract DatingApp {
         uint256 timestamp;
     }
 
+    struct Message {
+        address from;
+        uint256 timestamp;
+        string content;  // Message content, ideally encrypted or off-chain storage hash
+    }
+
     // --- Storage ---
 
     mapping(address => Profile) public profiles;
@@ -29,8 +36,15 @@ contract DatingApp {
     mapping(address => mapping(address => bool)) public matches;
     mapping(address => mapping(address => Blocked)) private blocks;
 
+    // Messaging: messages[user][peer] = array of messages between user and peer
+    mapping(address => mapping(address => Message[])) private messages;
+
     // Owner controls blacklisted users
     mapping(address => bool) public blacklist;
+
+    // List of all active users (for discovery)
+    address[] private activeUsers;
+    mapping(address => bool) private isActiveUser;
 
     // --- Events ---
 
@@ -46,6 +60,8 @@ contract DatingApp {
     event UserUnblocked(address indexed user, address indexed unblockedUser);
     event Blacklisted(address indexed user);
     event Whitelisted(address indexed user);
+
+    event MessageSent(address indexed from, address indexed to, string content);
 
     // --- Ownership and Access Control ---
 
@@ -70,60 +86,61 @@ contract DatingApp {
         owner = msg.sender;
     }
 
-    /// Transfer ownership
+    // --- Ownership functions ---
+
     function transferOwnership(address newOwner) external onlyOwner {
         require(newOwner != address(0), "Invalid new owner");
         owner = newOwner;
     }
 
-    /// Blacklist a user (admin only)
     function blacklistUser(address user) external onlyOwner {
         blacklist[user] = true;
         emit Blacklisted(user);
     }
 
-    /// Remove from blacklist
     function whitelistUser(address user) external onlyOwner {
         blacklist[user] = false;
         emit Whitelisted(user);
     }
 
-    // --- Profile Functions ---
+    // --- Profile management ---
 
-    /// Register or update your profile
-    function setProfile(string calldata ipfsHash) external notBlacklisted(msg.sender) {
+    function setProfile(string calldata ipfsHash, bool isPublic) external notBlacklisted(msg.sender) {
         require(bytes(ipfsHash).length > 0, "IPFS hash required");
 
         if (profiles[msg.sender].createdAt == 0) {
-            // New profile creation
             profiles[msg.sender] = Profile({
                 ipfsHash: ipfsHash,
                 verified: false,
                 createdAt: block.timestamp,
                 updatedAt: block.timestamp,
-                active: true
+                active: true,
+                isPublic: isPublic
             });
+            // Add to activeUsers list
+            if(!isActiveUser[msg.sender]){
+                activeUsers.push(msg.sender);
+                isActiveUser[msg.sender] = true;
+            }
             emit ProfileCreated(msg.sender, ipfsHash);
         } else {
-            // Updating existing active profile
             require(profiles[msg.sender].active, "Profile deleted");
             profiles[msg.sender].ipfsHash = ipfsHash;
             profiles[msg.sender].updatedAt = block.timestamp;
+            profiles[msg.sender].isPublic = isPublic;
             emit ProfileUpdated(msg.sender, ipfsHash);
         }
     }
 
-    /// Delete profile (soft delete)
     function deleteProfile() external hasProfile(msg.sender) {
         profiles[msg.sender].active = false;
 
-        // Optional: clear all likes and matches
-        // Not done here to save gas; frontend should filter inactive users
+        // Remove from activeUsers list (optional: gas heavy, so skipping)
+        // Frontend should filter inactive profiles
 
         emit ProfileDeleted(msg.sender);
     }
 
-    /// Verify a user (admin only)
     function verifyUser(address user) external onlyOwner hasProfile(user) {
         require(!profiles[user].verified, "Already verified");
         profiles[user].verified = true;
@@ -132,7 +149,6 @@ contract DatingApp {
 
     // --- Interaction Functions ---
 
-    /// Send a like to another user
     function likeUser(address to) external hasProfile(msg.sender) hasProfile(to) notBlacklisted(msg.sender) notBlacklisted(to) {
         require(msg.sender != to, "Cannot like yourself");
         require(!likes[msg.sender][to].liked, "Already liked");
@@ -149,7 +165,6 @@ contract DatingApp {
         }
     }
 
-    /// Remove a like (unlike)
     function unlikeUser(address to) external hasProfile(msg.sender) hasProfile(to) {
         require(likes[msg.sender][to].liked, "No existing like");
 
@@ -158,7 +173,6 @@ contract DatingApp {
 
         emit LikeRemoved(msg.sender, to);
 
-        // Remove match if existed
         if (matches[msg.sender][to]) {
             matches[msg.sender][to] = false;
             matches[to][msg.sender] = false;
@@ -166,41 +180,35 @@ contract DatingApp {
         }
     }
 
-    /// Check if two users matched
     function isMatch(address user1, address user2) external view returns (bool) {
         return matches[user1][user2];
     }
 
-    /// View if a user liked another user and when
     function getLikeInfo(address from, address to) external view returns (bool liked, uint256 timestamp) {
         Like memory l = likes[from][to];
         return (l.liked, l.timestamp);
     }
 
-    /// Block a user (stop receiving likes/matches/messages)
+    // --- Block / unblock ---
+
     function blockUser(address userToBlock) external hasProfile(msg.sender) hasProfile(userToBlock) {
         require(msg.sender != userToBlock, "Cannot block yourself");
         require(!blocks[msg.sender][userToBlock].isBlocked, "Already blocked");
 
         blocks[msg.sender][userToBlock] = Blocked(true, block.timestamp);
 
-        // Remove any existing likes/matches between them
-
-        // Remove like from blocker to blocked
         if (likes[msg.sender][userToBlock].liked) {
             likes[msg.sender][userToBlock].liked = false;
             likes[msg.sender][userToBlock].timestamp = 0;
             emit LikeRemoved(msg.sender, userToBlock);
         }
 
-        // Remove like from blocked to blocker
         if (likes[userToBlock][msg.sender].liked) {
             likes[userToBlock][msg.sender].liked = false;
             likes[userToBlock][msg.sender].timestamp = 0;
             emit LikeRemoved(userToBlock, msg.sender);
         }
 
-        // Remove match if existed
         if (matches[msg.sender][userToBlock]) {
             matches[msg.sender][userToBlock] = false;
             matches[userToBlock][msg.sender] = false;
@@ -210,7 +218,6 @@ contract DatingApp {
         emit UserBlocked(msg.sender, userToBlock);
     }
 
-    /// Unblock a previously blocked user
     function unblockUser(address userToUnblock) external hasProfile(msg.sender) {
         require(blocks[msg.sender][userToUnblock].isBlocked, "User not blocked");
 
@@ -220,8 +227,71 @@ contract DatingApp {
         emit UserUnblocked(msg.sender, userToUnblock);
     }
 
-    /// Check if userA blocked userB
     function isBlocked(address userA, address userB) external view returns (bool) {
         return blocks[userA][userB].isBlocked;
+    }
+
+    // --- Messaging ---
+
+    /// Send a message to a matched user
+    function sendMessage(address to, string calldata content) external hasProfile(msg.sender) hasProfile(to) {
+        require(matches[msg.sender][to], "You are not matched");
+        require(!blocks[to][msg.sender].isBlocked, "You are blocked by user");
+        require(!blocks[msg.sender][to].isBlocked, "You blocked this user");
+        require(bytes(content).length > 0, "Message content required");
+
+        Message memory newMsg = Message(msg.sender, block.timestamp, content);
+        messages[msg.sender][to].push(newMsg);
+        messages[to][msg.sender].push(newMsg);  // Keep symmetric history
+
+        emit MessageSent(msg.sender, to, content);
+    }
+
+    /// Get message count between two users
+    function getMessageCount(address user1, address user2) external view returns (uint256) {
+        return messages[user1][user2].length;
+    }
+
+    /// Get message by index between two users
+    function getMessage(address user1, address user2, uint256 index) external view returns (address from, uint256 timestamp, string memory content) {
+        require(index < messages[user1][user2].length, "Invalid message index");
+        Message storage m = messages[user1][user2][index];
+        return (m.from, m.timestamp, m.content);
+    }
+
+    // --- User Discovery ---
+
+    /// Get list of all active users (could be paginated in frontend)
+    function getActiveUsers() external view returns (address[] memory) {
+        return activeUsers;
+    }
+
+    /// Get profile data for a user (only public profiles or caller's own)
+    function getProfile(address user) external view returns (string memory ipfsHash, bool verified, bool active, bool isPublic) {
+        Profile memory p = profiles[user];
+        require(p.active, "Profile not active");
+        require(p.isPublic || msg.sender == user, "Profile is private");
+        return (p.ipfsHash, p.verified, p.active, p.isPublic);
+    }
+
+    /// Get all matches for caller
+    function getMatches() external view hasProfile(msg.sender) returns (address[] memory) {
+        uint256 count = 0;
+        // Count matches first
+        for (uint256 i = 0; i < activeUsers.length; i++) {
+            if (matches[msg.sender][activeUsers[i]]) {
+                count++;
+            }
+        }
+        // Collect matches
+        address[] memory result = new address[](count);
+        uint256 idx = 0;
+        for (uint256 i = 0; i < activeUsers.length; i++) {
+            if (matches[msg.sender][activeUsers[i]]) {
+                result[idx] = activeUsers[i];
+                idx++;
+            }
+        }
+        return result;
     }
 }
