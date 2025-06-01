@@ -2,14 +2,14 @@
 pragma solidity ^0.8.20;
 
 contract DatingApp {
-    // --- Data Structures ---
+ 
 
     struct Profile {
         string ipfsHash;        
-        bool verified;         
-        uint256 createdAt; 
-        uint256 updatedAt;   
-        bool active;        
+        bool verified;          
+        uint256 createdAt;      
+        uint256 updatedAt;    
+        bool active;          
         bool isPublic;          
     }
 
@@ -26,27 +26,23 @@ contract DatingApp {
     struct Message {
         address from;
         uint256 timestamp;
-        string content;  // Message content, ideally encrypted or off-chain storage hash
+        string content;  
     }
 
-    // --- Storage ---
+   
 
     mapping(address => Profile) public profiles;
     mapping(address => mapping(address => Like)) private likes;
     mapping(address => mapping(address => bool)) public matches;
     mapping(address => mapping(address => Blocked)) private blocks;
 
-    // Messaging: messages[user][peer] = array of messages between user and peer
+    
     mapping(address => mapping(address => Message[])) private messages;
 
-    // Owner controls blacklisted users
     mapping(address => bool) public blacklist;
 
-    // List of all active users (for discovery)
     address[] private activeUsers;
     mapping(address => bool) private isActiveUser;
-
-    // --- Events ---
 
     event ProfileCreated(address indexed user, string ipfsHash);
     event ProfileUpdated(address indexed user, string ipfsHash);
@@ -62,8 +58,6 @@ contract DatingApp {
     event Whitelisted(address indexed user);
 
     event MessageSent(address indexed from, address indexed to, string content);
-
-    // --- Ownership and Access Control ---
 
     address public owner;
 
@@ -86,8 +80,6 @@ contract DatingApp {
         owner = msg.sender;
     }
 
-    // --- Ownership functions ---
-
     function transferOwnership(address newOwner) external onlyOwner {
         require(newOwner != address(0), "Invalid new owner");
         owner = newOwner;
@@ -103,12 +95,11 @@ contract DatingApp {
         emit Whitelisted(user);
     }
 
-    // --- Profile management ---
-
     function setProfile(string calldata ipfsHash, bool isPublic) external notBlacklisted(msg.sender) {
         require(bytes(ipfsHash).length > 0, "IPFS hash required");
 
         if (profiles[msg.sender].createdAt == 0) {
+    
             profiles[msg.sender] = Profile({
                 ipfsHash: ipfsHash,
                 verified: false,
@@ -117,26 +108,34 @@ contract DatingApp {
                 active: true,
                 isPublic: isPublic
             });
-            // Add to activeUsers list
             if(!isActiveUser[msg.sender]){
                 activeUsers.push(msg.sender);
                 isActiveUser[msg.sender] = true;
             }
             emit ProfileCreated(msg.sender, ipfsHash);
         } else {
-            require(profiles[msg.sender].active, "Profile deleted");
+           
             profiles[msg.sender].ipfsHash = ipfsHash;
             profiles[msg.sender].updatedAt = block.timestamp;
             profiles[msg.sender].isPublic = isPublic;
-            emit ProfileUpdated(msg.sender, ipfsHash);
+
+            if (!profiles[msg.sender].active) {
+                profiles[msg.sender].active = true;  // Reactivate profile
+                if(!isActiveUser[msg.sender]){
+                    activeUsers.push(msg.sender);
+                    isActiveUser[msg.sender] = true;
+                }
+                emit ProfileCreated(msg.sender, ipfsHash);
+            } else {
+                emit ProfileUpdated(msg.sender, ipfsHash);
+            }
         }
     }
 
     function deleteProfile() external hasProfile(msg.sender) {
         profiles[msg.sender].active = false;
 
-        // Remove from activeUsers list (optional: gas heavy, so skipping)
-        // Frontend should filter inactive profiles
+     
 
         emit ProfileDeleted(msg.sender);
     }
@@ -147,7 +146,7 @@ contract DatingApp {
         emit Verified(user);
     }
 
-    // --- Interaction Functions ---
+   
 
     function likeUser(address to) external hasProfile(msg.sender) hasProfile(to) notBlacklisted(msg.sender) notBlacklisted(to) {
         require(msg.sender != to, "Cannot like yourself");
@@ -189,7 +188,6 @@ contract DatingApp {
         return (l.liked, l.timestamp);
     }
 
-    // --- Block / unblock ---
 
     function blockUser(address userToBlock) external hasProfile(msg.sender) hasProfile(userToBlock) {
         require(msg.sender != userToBlock, "Cannot block yourself");
@@ -231,9 +229,7 @@ contract DatingApp {
         return blocks[userA][userB].isBlocked;
     }
 
-    // --- Messaging ---
-
-    /// Send a message to a matched user
+   
     function sendMessage(address to, string calldata content) external hasProfile(msg.sender) hasProfile(to) {
         require(matches[msg.sender][to], "You are not matched");
         require(!blocks[to][msg.sender].isBlocked, "You are blocked by user");
@@ -242,31 +238,24 @@ contract DatingApp {
 
         Message memory newMsg = Message(msg.sender, block.timestamp, content);
         messages[msg.sender][to].push(newMsg);
-        messages[to][msg.sender].push(newMsg);  // Keep symmetric history
+        messages[to][msg.sender].push(newMsg);  
 
         emit MessageSent(msg.sender, to, content);
     }
 
-    /// Get message count between two users
     function getMessageCount(address user1, address user2) external view returns (uint256) {
         return messages[user1][user2].length;
     }
-
-    /// Get message by index between two users
     function getMessage(address user1, address user2, uint256 index) external view returns (address from, uint256 timestamp, string memory content) {
         require(index < messages[user1][user2].length, "Invalid message index");
         Message storage m = messages[user1][user2][index];
         return (m.from, m.timestamp, m.content);
     }
 
-    // --- User Discovery ---
-
-    /// Get list of all active users (could be paginated in frontend)
     function getActiveUsers() external view returns (address[] memory) {
         return activeUsers;
     }
 
-    /// Get profile data for a user (only public profiles or caller's own)
     function getProfile(address user) external view returns (string memory ipfsHash, bool verified, bool active, bool isPublic) {
         Profile memory p = profiles[user];
         require(p.active, "Profile not active");
@@ -274,16 +263,15 @@ contract DatingApp {
         return (p.ipfsHash, p.verified, p.active, p.isPublic);
     }
 
-    /// Get all matches for caller
     function getMatches() external view hasProfile(msg.sender) returns (address[] memory) {
         uint256 count = 0;
-        // Count matches first
+       
         for (uint256 i = 0; i < activeUsers.length; i++) {
             if (matches[msg.sender][activeUsers[i]]) {
                 count++;
             }
         }
-        // Collect matches
+       
         address[] memory result = new address[](count);
         uint256 idx = 0;
         for (uint256 i = 0; i < activeUsers.length; i++) {
