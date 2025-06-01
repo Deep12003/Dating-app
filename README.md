@@ -27,24 +27,27 @@ Our vision is to empower users with full control over their dating profiles and 
 ---
 
 ## Future Scope
-- **Enhanced Profile Verification:** Integrate identity verification through decentralized identity solutions.
-- **Advanced Matching Algorithms:** Incorporate AI-driven match suggestions on-chain/off-chain.
-- **Reputation System:** Develop a trust and reputation scoring mechanism based on user interactions.
-- **Token Rewards:** Introduce native tokens to reward active and verified users.
-- **Mobile App:** Build native mobile versions for seamless user experience.
-- **Multi-Chain Support:** Expand compatibility to other blockchains for broader adoption.
+
+- **Decentralized Identity Integration:** Implement Decentralized Identifiers (DIDs) for robust user verification.  
+- **AI-Powered Matching:** Leverage intelligent algorithms for personalized match suggestions both on-chain and off-chain.  
+- **Reputation and Trust Scores:** Create a decentralized reputation system based on user feedback and behavior.  
+- **Token Incentives:** Introduce native tokens to reward verified profiles and active participation.  
+- **Mobile Application Development:** Launch native mobile apps for enhanced accessibility and user experience.  
+- **Cross-Chain Compatibility:** Expand support to multiple blockchain networks to increase accessibility and scalability.  
+- **Enhanced Privacy Features:** Integrate zero-knowledge proofs or advanced cryptographic techniques to further protect user data.
 
 ---
 
 ## Key Features
-- Wallet-based authentication via MetaMask.
-- Profile creation with IPFS-hosted metadata.
-- Public and private profile visibility controls.
-- Admin verification of user profiles.
-- Like/unlike and match-making functionalities.
-- Real-time decentralized messaging.
-- User blocking and unblocking capabilities.
-- Transparent on-chain data and interactions.
+
+- **Wallet-Based Authentication:** Seamless login via MetaMask or compatible Ethereum wallets.  
+- **Decentralized Profile Management:** Create and update profiles with metadata securely stored on IPFS.  
+- **Privacy Controls:** Users can choose to make their profiles public or private, ensuring full control over data visibility.  
+- **Admin Verification:** Verified profiles to promote authenticity and trust within the community.  
+- **Matchmaking System:** On-chain like, unlike, and match functionalities to foster genuine connections.  
+- **Real-Time Messaging:** Secure, decentralized chat enabling direct communication between matched users.  
+- **User Moderation:** Block and unblock users to enhance safety and user experience.  
+- **Transparency and Security:** Critical user interactions are recorded on-chain for data integrity and trustlessness.
 
 ---
 
