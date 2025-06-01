@@ -248,15 +248,14 @@ function App() {
       <div className="wallet-connect-box">
         <h1>Dating DApp</h1>
         <img
-          src="https://images.unsplash.com/photo-1515377905703-c4788e51af15?auto=format&fit=crop&w=600&q=80"
+          src="https://cdn3d.iconscout.com/3d/free/thumb/free-metamask-3d-icon-download-in-png-blend-fbx-gltf-file-formats--blockchain-cryptocurrency-crypto-wallet-software-pack-logos-icons-5326393.png"
           alt="Dating Illustration"
           style={{
             width: "150px",
             height: "150px",
-            borderRadius: "50%",  // Makes image circular
+            borderRadius: "0%",  // Makes image circular
             objectFit: "cover",
             margin: "20px 0",
-            border: "3px solid #ff4081"
           }}
         />
         <button onClick={connectWallet}>Connect Wallet</button>
