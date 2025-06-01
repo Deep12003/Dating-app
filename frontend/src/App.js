@@ -3,7 +3,7 @@ import { ethers } from "ethers";
 import "./App.css";
 import DatingAppArtifact from "./DatingApp.json";
 
-const CONTRACT_ADDRESS = "0x103De7Ae093D0Ba831548fa546ECf1640412BfEE";
+const CONTRACT_ADDRESS = "0x6760860a1dF20098D65Ae3649b37751a35b7A0cE";
 const CONTRACT_ABI = DatingAppArtifact.abi;
 
 function App() {
@@ -147,7 +147,7 @@ const loadAppData = async () => {
   const handleVerifyUser = async (userAddress) => {
     if (!window.confirm(`Verify user ${userAddress}?`)) return;
     try {
-      const tx = await contract.verifyProfile(userAddress);
+      const tx = await contract.verifyUser(userAddress);
       await tx.wait();
       alert(`User ${userAddress} verified.`);
       loadAppData();
@@ -194,27 +194,53 @@ const loadAppData = async () => {
     }
   };
 
+const handleClearChat = async () => {
+  if (!selectedUser) return alert("No user selected.");
+  if (!window.confirm(`Are you sure you want to clear chat with ${selectedUser}?`)) return;
+
+  try {
+    const tx = await contract.clearChat(selectedUser);
+    await tx.wait();
+    alert("Chat cleared.");
+    setMessages([]); // Clear chat messages in UI
+  } catch (error) {
+    alert("Failed to clear chat: " + (error?.data?.message || error.message));
+  }
+};
+
   const loadMessages = async (peerAddress) => {
-    if (!contract || !account || !peerAddress) return;
+  if (!contract || !account || !peerAddress) return;
 
-    try {
-      const messageCount = await contract.getMessageCount(account, peerAddress);
-      const messageList = [];
+  try {
+    const messageCount = await contract.getMessageCount(account, peerAddress);
+    const messageList = [];
 
-      for (let i = 0; i < messageCount; i++) {
-        const message = await contract.getMessage(account, peerAddress, i);
-        messageList.push({
-          from: message[0],
-          timestamp: new Date(message[1].toNumber() * 1000).toLocaleString(),
-          content: message[2],
-        });
+    for (let i = 0; i < messageCount; i++) {
+      const message = await contract.getMessage(account, peerAddress, i);
+  
+      let timestampRaw = message[1];
+      let timestampNum;
+
+      if (timestampRaw && typeof timestampRaw.toNumber === "function") {
+        timestampNum = timestampRaw.toNumber();
+      } else {
+      
+        timestampNum = Number(timestampRaw);
       }
 
-      setMessages(messageList);
-    } catch (error) {
-      alert("Failed to load messages: " + (error?.data?.message || error.message));
+      messageList.push({
+        from: message[0],
+        timestamp: new Date(timestampNum * 1000).toLocaleString(),
+        content: message[2],
+      });
     }
-  };
+
+    setMessages(messageList);
+  } catch (error) {
+    alert("Failed to load messages: " + (error?.data?.message || error.message));
+  }
+};
+
 
   const handleBlockUser = async (userAddress) => {
     try {
@@ -239,6 +265,24 @@ const loadAppData = async () => {
       alert("Error unblocking user: " + (error?.data?.message || error.message));
     }
   };
+
+  useEffect(() => {
+    if (!contract || !account) return;
+    const id = setInterval(() => {
+      loadAppData();
+    }, 5000);
+    return () => clearInterval(id);
+  }, [contract, account]);
+
+  useEffect(() => {
+    if (!contract || !account || !selectedUser) return;
+    const id = setInterval(() => {
+      loadMessages(selectedUser);
+    }, 3000);
+    return () => clearInterval(id);
+  }, [contract, account, selectedUser]);
+
+  
 
   if (!account) {
     return (
@@ -358,6 +402,12 @@ const loadAppData = async () => {
                 setSelectedUser(null);
                 setMessages([]);
               }}>Close Chat</button>
+
+              <button onClick={handleClearChat} style={{ marginLeft: "10px" }}>
+                Clear Chat
+              </button>
+
+              
             </p>
             <div className="chat-box" style={{
               border: "1px solid #ccc",
