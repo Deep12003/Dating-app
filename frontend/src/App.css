@@ -1,6 +1,3 @@
-/* ===================== */
-/* Base Reset + Defaults */
-/* ===================== */
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
 
 * {
@@ -17,9 +14,6 @@ body, html, #root {
   color: #333;
 }
 
-/* ===================== */
-/* App Container */
-/* ===================== */
 .app-container {
   max-width: 900px;
   margin: 3rem auto 5rem;
@@ -33,9 +27,6 @@ body, html, #root {
   box-shadow: 0 16px 50px rgba(233, 30, 99, 0.25);
 }
 
-/* ===================== */
-/* Heading */
-/* ===================== */
 .app-container h1 {
   font-size: 2.6rem;
   text-align: center;
@@ -45,9 +36,6 @@ body, html, #root {
   letter-spacing: 1px;
 }
 
-/* ===================== */
-/* Buttons */
-/* ===================== */
 button {
   background-color: #ff4081;
   color: white;
@@ -80,9 +68,6 @@ button.delete-profile:hover {
   background-color: #c62828;
 }
 
-/* ===================== */
-/* Inputs and Labels */
-/* ===================== */
 input[type="text"], input[type="checkbox"] {
   padding: 0.6rem 1rem;
   font-size: 1rem;
@@ -108,9 +93,6 @@ label {
   display: inline-block;
 }
 
-/* ===================== */
-/* Section Styles */
-/* ===================== */
 section {
   margin-top: 3rem;
   padding-top: 1.5rem;
@@ -126,16 +108,13 @@ section h2 {
   padding-bottom: 0.5rem;
 }
 
-/* ===================== */
-/* User List */
-/* ===================== */
 .user-list li {
   background: #fff8fb;
   padding: 1rem 1.4rem;
   border-radius: 18px;
   margin-bottom: 1rem;
   display: flex;
-  flex-direction: column; /* Changed to column for stacked content */
+  flex-direction: column; 
   border: 1px solid #ffd1dc;
   box-shadow: 0 4px 10px rgba(255, 105, 180, 0.1);
   transition: background 0.3s ease, box-shadow 0.3s ease;
@@ -165,14 +144,12 @@ section h2 {
   margin-left: 10px;
 }
 
-/* Buttons container inside user list item */
 .user-list li > div:nth-child(2) {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
 }
 
-/* Inline Button */
 .user-list li button {
   margin: 0;
   padding: 0.4rem 1rem;
@@ -187,9 +164,6 @@ section h2 {
   transform: scale(1.08);
 }
 
-/* ===================== */
-/* Chat Box */
-/* ===================== */
 .chat-box {
   max-height: 300px;
   overflow-y: auto;
@@ -200,7 +174,6 @@ section h2 {
   border: 1.5px solid #ffc1e3;
 }
 
-/* Chat Messages */
 .message {
   margin-bottom: 1rem;
   padding: 0.75rem 1.2rem;
@@ -226,9 +199,6 @@ section h2 {
   box-shadow: 0 2px 8px rgba(255, 105, 180, 0.2);
 }
 
-/* ===================== */
-/* Wallet Connect Page */
-/* ===================== */
 .wallet-connect-wrapper {
   height: 100vh;
   display: flex;
@@ -278,9 +248,6 @@ section h2 {
   filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1));
 }
 
-/* ===================== */
-/* Responsive */
-/* ===================== */
 @media (max-width: 480px) {
   .wallet-connect-box {
     padding: 1.5rem 2rem;
