@@ -21,8 +21,6 @@ function App() {
   const [messages, setMessages] = useState([]);
   const [messageInput, setMessageInput] = useState("");
   const [isOwner, setIsOwner] = useState(false);
-
-  // Connect wallet and initialize provider, signer, contract
   const connectWallet = async () => {
     if (!window.ethereum) {
       alert("Please install MetaMask to continue.");
@@ -45,7 +43,6 @@ function App() {
     }
   };
 
-  // Check if current account is contract owner
   useEffect(() => {
     const checkOwner = async () => {
       if (!contract || !account) return;
@@ -59,7 +56,6 @@ function App() {
     checkOwner();
   }, [contract, account]);
 
-  // Fetch a user's profile, with error handling for private/inactive profiles
   const fetchProfile = async (userAddress) => {
     if (!contract) return null;
     try {
@@ -75,35 +71,44 @@ function App() {
     }
   };
 
-  // Load user profile, active users, and matches
-  const loadAppData = async () => {
-    if (!contract || !account) return;
+const loadAppData = async () => {
+  if (!contract || !account) return;
 
-    const userProfile = await fetchProfile(account);
-    setProfile(userProfile);
+  const userProfile = await fetchProfile(account);
+  setProfile(userProfile);
 
-    try {
-      const users = await contract.getActiveUsers();
-      setActiveUsers(users);
-    } catch {
-      setActiveUsers([]);
-    }
+  try {
+    const users = await contract.getActiveUsers();
 
-    try {
-      const matchList = await contract.getMatches();
-      setMatches(matchList);
-    } catch (error) {
-      if (
-        error?.reason === "Profile inactive or not found" ||
-        error?.message.includes("Profile inactive or not found")
-      ) {
-        setMatches([]);
-      } else {
-        console.error("Error loading matches:", error);
-        setMatches([]);
+    const activeProfiles = [];
+    for (const userAddress of users) {
+      const prof = await fetchProfile(userAddress);
+      if (prof && prof.active) {
+        activeProfiles.push(userAddress);
       }
     }
-  };
+
+    setActiveUsers(activeProfiles);
+  } catch {
+    setActiveUsers([]);
+  }
+
+  try {
+    const matchList = await contract.getMatches();
+    setMatches(matchList);
+  } catch (error) {
+    if (
+      error?.reason === "Profile inactive or not found" ||
+      error?.message.includes("Profile inactive or not found")
+    ) {
+      setMatches([]);
+    } else {
+      console.error("Error loading matches:", error);
+      setMatches([]);
+    }
+  }
+};
+
 
   useEffect(() => {
     if (contract && account) {
@@ -111,7 +116,6 @@ function App() {
     }
   }, [contract, account]);
 
-  // Set or update profile
   const handleSetProfile = async () => {
     if (!ipfsHash.trim()) return alert("Please provide an IPFS hash.");
     try {
@@ -126,7 +130,6 @@ function App() {
     }
   };
 
-  // Delete profile
   const handleDeleteProfile = async () => {
     if (!window.confirm("Are you sure you want to delete your profile? This action cannot be undone.")) return;
     try {
@@ -141,7 +144,6 @@ function App() {
     }
   };
 
-  // Verify user (owner only)
   const handleVerifyUser = async (userAddress) => {
     if (!window.confirm(`Verify user ${userAddress}?`)) return;
     try {
@@ -154,7 +156,6 @@ function App() {
     }
   };
 
-  // Like / Unlike user
   const handleLikeUser = async (userAddress) => {
     if (userAddress.toLowerCase() === account.toLowerCase()) return alert("You cannot like yourself.");
     try {
@@ -180,7 +181,6 @@ function App() {
     }
   };
 
-  // Messaging
   const handleSendMessage = async () => {
     if (!messageInput.trim()) return alert("Message cannot be empty.");
     if (!selectedUser) return alert("Please select a user to send message.");
@@ -216,7 +216,6 @@ function App() {
     }
   };
 
-  // Block / Unblock user
   const handleBlockUser = async (userAddress) => {
     try {
       const tx = await contract.blockUser(userAddress);
@@ -241,7 +240,6 @@ function App() {
     }
   };
 
-  // Wallet Connect UI when no account connected
   if (!account) {
     return (
       <div className="wallet-connect-wrapper">
@@ -264,7 +262,7 @@ function App() {
     );
   }
 
-  // Main App JSX
+ 
   return (
     <div className="app-container">
       <h1>💘 Dating DApp</h1>
