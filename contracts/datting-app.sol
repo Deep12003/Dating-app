@@ -50,6 +50,9 @@ contract DatingApp {
     event Blacklisted(address indexed user);
     event Whitelisted(address indexed user);
     event MessageSent(address indexed from, address indexed to, string content);
+    event ChatCleared(address indexed user1, address indexed user2);
+
+
 
     address public owner;
 
@@ -288,5 +291,13 @@ contract DatingApp {
             }
         }
         return result;
+    }
+    function clearChat(address withUser) external hasProfile(msg.sender) hasProfile(withUser) {
+    require(msg.sender != withUser, "Cannot clear chat with yourself");
+
+    delete messages[msg.sender][withUser];
+    delete messages[withUser][msg.sender];
+
+    emit ChatCleared(msg.sender, withUser); 
     }
 }
