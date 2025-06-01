@@ -2,15 +2,13 @@
 pragma solidity ^0.8.20;
 
 contract DatingApp {
- 
-
     struct Profile {
-        string ipfsHash;        
-        bool verified;          
-        uint256 createdAt;      
-        uint256 updatedAt;    
-        bool active;          
-        bool isPublic;          
+        string ipfsHash;
+        bool verified;
+        uint256 createdAt;
+        uint256 updatedAt;
+        bool active;
+        bool isPublic;
     }
 
     struct Like {
@@ -26,19 +24,14 @@ contract DatingApp {
     struct Message {
         address from;
         uint256 timestamp;
-        string content;  
+        string content;
     }
-
-   
 
     mapping(address => Profile) public profiles;
     mapping(address => mapping(address => Like)) private likes;
     mapping(address => mapping(address => bool)) public matches;
     mapping(address => mapping(address => Blocked)) private blocks;
-
-    
     mapping(address => mapping(address => Message[])) private messages;
-
     mapping(address => bool) public blacklist;
 
     address[] private activeUsers;
@@ -56,7 +49,6 @@ contract DatingApp {
     event UserUnblocked(address indexed user, address indexed unblockedUser);
     event Blacklisted(address indexed user);
     event Whitelisted(address indexed user);
-
     event MessageSent(address indexed from, address indexed to, string content);
 
     address public owner;
@@ -99,7 +91,6 @@ contract DatingApp {
         require(bytes(ipfsHash).length > 0, "IPFS hash required");
 
         if (profiles[msg.sender].createdAt == 0) {
-    
             profiles[msg.sender] = Profile({
                 ipfsHash: ipfsHash,
                 verified: false,
@@ -108,20 +99,19 @@ contract DatingApp {
                 active: true,
                 isPublic: isPublic
             });
-            if(!isActiveUser[msg.sender]){
+            if (!isActiveUser[msg.sender]) {
                 activeUsers.push(msg.sender);
                 isActiveUser[msg.sender] = true;
             }
             emit ProfileCreated(msg.sender, ipfsHash);
         } else {
-           
             profiles[msg.sender].ipfsHash = ipfsHash;
             profiles[msg.sender].updatedAt = block.timestamp;
             profiles[msg.sender].isPublic = isPublic;
 
             if (!profiles[msg.sender].active) {
-                profiles[msg.sender].active = true;  // Reactivate profile
-                if(!isActiveUser[msg.sender]){
+                profiles[msg.sender].active = true;
+                if (!isActiveUser[msg.sender]) {
                     activeUsers.push(msg.sender);
                     isActiveUser[msg.sender] = true;
                 }
@@ -134,8 +124,15 @@ contract DatingApp {
 
     function deleteProfile() external hasProfile(msg.sender) {
         profiles[msg.sender].active = false;
+        isActiveUser[msg.sender] = false;
 
-     
+        for (uint256 i = 0; i < activeUsers.length; i++) {
+            if (activeUsers[i] == msg.sender) {
+                activeUsers[i] = activeUsers[activeUsers.length - 1];
+                activeUsers.pop();
+                break;
+            }
+        }
 
         emit ProfileDeleted(msg.sender);
     }
@@ -145,8 +142,6 @@ contract DatingApp {
         profiles[user].verified = true;
         emit Verified(user);
     }
-
-   
 
     function likeUser(address to) external hasProfile(msg.sender) hasProfile(to) notBlacklisted(msg.sender) notBlacklisted(to) {
         require(msg.sender != to, "Cannot like yourself");
@@ -188,7 +183,6 @@ contract DatingApp {
         return (l.liked, l.timestamp);
     }
 
-
     function blockUser(address userToBlock) external hasProfile(msg.sender) hasProfile(userToBlock) {
         require(msg.sender != userToBlock, "Cannot block yourself");
         require(!blocks[msg.sender][userToBlock].isBlocked, "Already blocked");
@@ -229,7 +223,6 @@ contract DatingApp {
         return blocks[userA][userB].isBlocked;
     }
 
-   
     function sendMessage(address to, string calldata content) external hasProfile(msg.sender) hasProfile(to) {
         require(matches[msg.sender][to], "You are not matched");
         require(!blocks[to][msg.sender].isBlocked, "You are blocked by user");
@@ -238,7 +231,7 @@ contract DatingApp {
 
         Message memory newMsg = Message(msg.sender, block.timestamp, content);
         messages[msg.sender][to].push(newMsg);
-        messages[to][msg.sender].push(newMsg);  
+        messages[to][msg.sender].push(newMsg);
 
         emit MessageSent(msg.sender, to, content);
     }
@@ -246,6 +239,7 @@ contract DatingApp {
     function getMessageCount(address user1, address user2) external view returns (uint256) {
         return messages[user1][user2].length;
     }
+
     function getMessage(address user1, address user2, uint256 index) external view returns (address from, uint256 timestamp, string memory content) {
         require(index < messages[user1][user2].length, "Invalid message index");
         Message storage m = messages[user1][user2][index];
@@ -253,7 +247,22 @@ contract DatingApp {
     }
 
     function getActiveUsers() external view returns (address[] memory) {
-        return activeUsers;
+        uint256 count = 0;
+        for (uint256 i = 0; i < activeUsers.length; i++) {
+            if (profiles[activeUsers[i]].active) {
+                count++;
+            }
+        }
+
+        address[] memory result = new address[](count);
+        uint256 index = 0;
+        for (uint256 i = 0; i < activeUsers.length; i++) {
+            if (profiles[activeUsers[i]].active) {
+                result[index++] = activeUsers[i];
+            }
+        }
+
+        return result;
     }
 
     function getProfile(address user) external view returns (string memory ipfsHash, bool verified, bool active, bool isPublic) {
@@ -265,19 +274,17 @@ contract DatingApp {
 
     function getMatches() external view hasProfile(msg.sender) returns (address[] memory) {
         uint256 count = 0;
-       
         for (uint256 i = 0; i < activeUsers.length; i++) {
             if (matches[msg.sender][activeUsers[i]]) {
                 count++;
             }
         }
-       
+
         address[] memory result = new address[](count);
         uint256 idx = 0;
         for (uint256 i = 0; i < activeUsers.length; i++) {
             if (matches[msg.sender][activeUsers[i]]) {
-                result[idx] = activeUsers[i];
-                idx++;
+                result[idx++] = activeUsers[i];
             }
         }
         return result;
