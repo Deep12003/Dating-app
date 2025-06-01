@@ -53,22 +53,41 @@ Our vision is to empower users with full control over their dating profiles and 
 
 ## Frontend Showcase
 
-![Connect Wallet Screen](https://cdn3d.iconscout.com/3d/free/thumb/free-metamask-3d-icon-download-in-png-blend-fbx-gltf-file-formats--blockchain-cryptocurrency-crypto-wallet-software-pack-logos-icons-5326393.png)
+To provide a clear view of the user experience and interface, below are some screenshots and demo videos of the Dating Dapp
 
-**Main Interface:**
+### Demo Video 
 
-- User profile management
-- Active users list with like and chat options
-- Messaging panel with history
-- Admin controls for user verification
+https://github.com/user-attachments/assets/bebe1605-5518-4439-b3a4-65a62320ab76
+
+### Screenshots
+
+### 1. Connect Wallet
+
+![image](https://github.com/user-attachments/assets/24dd601b-7c95-403e-97bb-d565cf8b7584)
+
+### 2. Your Profile 
+
+![image](https://github.com/user-attachments/assets/27374d95-894f-4a9e-ba3b-773707183049)
+
+### 3. Active User
+
+![image](https://github.com/user-attachments/assets/bb08110d-5ed2-4a53-85af-4b2b81a5c99b)
+
+### 4. Chats
+
+
+![image](https://github.com/user-attachments/assets/e11ba153-028f-4c2b-92b8-5f3c11c991c5)
+
 
 ---
 
 ## Contract Address
 
-`0x103De7Ae093D0Ba831548fa546ECf1640412BfEE`
+`0x45029E8cEa7d9ce01074a7a05bcBC8223E68961b`
+
+
+![image](https://github.com/user-attachments/assets/bc1d0bef-f315-4ca9-9b35-8582209a08c9)
+
 
 ---
 
-Thank you for exploring this project!  
-Feel free to contribute or report issues.
