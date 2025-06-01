@@ -3,7 +3,7 @@ import { ethers } from "ethers";
 import "./App.css";
 import DatingAppArtifact from "./DatingApp.json";
 
-const CONTRACT_ADDRESS = "0x689Ed5B65EC1A834DfEFD0e6b767d8eD49C4B08E";
+const CONTRACT_ADDRESS = "0x103De7Ae093D0Ba831548fa546ECf1640412BfEE";
 const CONTRACT_ABI = DatingAppArtifact.abi;
 
 function App() {
