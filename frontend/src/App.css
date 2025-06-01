@@ -1,38 +1,257 @@
-.App {
+/* Reset some default styles */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #333;
+}
+
+body, html, #root {
+  height: 100%;
+  background: #f5f7fa;
+}
+
+/* APP CONTAINER */
+.app-container {
+  max-width: 900px;
+  margin: 2rem auto 4rem;
+  padding: 2rem;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
+}
+
+/* PAGE TITLE */
+.app-container h1 {
+  font-size: 2.4rem;
+  text-align: center;
+  color: #e91e63; /* Pink accent */
+  margin-bottom: 2rem;
+}
+
+/* BUTTONS */
+button {
+  background-color: #e91e63;
+  color: white;
+  border: none;
+  padding: 0.6rem 1.4rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 1rem;
+  transition: background-color 0.3s ease;
+  margin-right: 0.6rem;
+}
+
+button:hover {
+  background-color: #c2185b;
+}
+
+/* SPECIFIC BUTTON STYLES */
+button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+button.delete-profile {
+  background-color: #d32f2f;
+}
+
+button.delete-profile:hover {
+  background-color: #b71c1c;
+}
+
+/* INPUT FIELDS */
+input[type="text"], input[type="checkbox"] {
+  padding: 0.5rem 0.8rem;
+  font-size: 1rem;
+  border: 1.5px solid #ddd;
+  border-radius: 8px;
+  width: 100%;
+  max-width: 350px;
+  transition: border-color 0.3s ease;
+}
+
+input[type="text"]:focus {
+  border-color: #e91e63;
+  outline: none;
+}
+
+/* CHECKBOX LABEL */
+label {
+  font-size: 1rem;
+  user-select: none;
+}
+
+/* PROFILE SECTION */
+section {
+  margin-top: 2rem;
+  padding-top: 1rem;
+  border-top: 1px solid #eee;
+}
+
+section h2 {
+  margin-bottom: 1rem;
+  color: #444;
+  border-bottom: 2px solid #e91e63;
+  padding-bottom: 0.4rem;
+  font-weight: 700;
+}
+
+/* LISTS */
+ul {
+  list-style-type: none;
+  padding-left: 0;
+}
+
+.user-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.8rem 1rem;
+  background: #fafafa;
+  margin-bottom: 0.6rem;
+  border-radius: 10px;
+  border: 1px solid #eee;
+  font-family: 'Courier New', Courier, monospace;
+  word-break: break-all;
+}
+
+.user-list li strong {
+  font-weight: 700;
+  color: #222;
+}
+
+/* USER BUTTONS INLINE */
+.user-list li button {
+  margin-left: 0.4rem;
+  padding: 0.3rem 0.7rem;
+  font-size: 0.85rem;
+}
+
+/* MATCHED LABEL */
+.user-list li span {
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: #4caf50;
+  margin-left: 0.5rem;
+}
+
+/* CHAT BOX */
+.chat-box {
+  max-height: 250px;
+  overflow-y: auto;
+  background: #f0f0f0;
+  border-radius: 12px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  border: 1px solid #ddd;
+  font-size: 0.9rem;
+}
+
+/* MESSAGE BUBBLES */
+.message {
+  margin-bottom: 0.8rem;
+  padding: 0.5rem 0.8rem;
+  border-radius: 12px;
+  max-width: 80%;
+  word-wrap: break-word;
+}
+
+.message.sent {
+  background-color: #e91e63;
+  color: white;
+  align-self: flex-end;
+  margin-left: auto;
+}
+
+.message.received {
+  background-color: #ddd;
+  color: #333;
+  align-self: flex-start;
+  margin-right: auto;
+}
+
+/* MESSAGE INPUT */
+input[type="text"] {
+  margin-bottom: 0.8rem;
+  max-width: 100%;
+}
+
+/* -------- WALLET CONNECT PAGE -------- */
+
+/* Wallet Connect Page Wrapper */
+.wallet-connect-wrapper {
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #fce4ec, #f8bbd0);
+  padding: 1rem;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Wallet Connect Box */
+.wallet-connect-box {
+  background-color: #fff;
+  padding: 2.5rem 3rem;
+  border-radius: 15px;
+  width: 100%;
+  max-width: 400px;
+  box-shadow: 0 8px 25px rgba(233, 30, 99, 0.2);
   text-align: center;
 }
 
-.App-logo {
-  height: 40vmin;
+/* Heading */
+.wallet-connect-box h1 {
+  color: #e91e63;
+  margin-bottom: 1.5rem;
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+/* Connect Button */
+.wallet-connect-box button {
+  width: 100%;
+  padding: 0.85rem;
+  font-size: 1.2rem;
+  font-weight: 700;
+  border: none;
+  border-radius: 10px;
+  background-color: #e91e63;
+  color: #fff;
+  cursor: pointer;
+  box-shadow: 0 5px 15px rgba(233, 30, 99, 0.5);
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.wallet-connect-box button:hover {
+  background-color: #c2185b;
+  box-shadow: 0 8px 20px rgba(233, 30, 99, 0.7);
+}
+
+/* Optional Wallet Image */
+.wallet-connect-box img {
+  margin-top: 1.8rem;
+  max-width: 150px;
+  opacity: 0.9;
+  filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1));
+  user-select: none;
   pointer-events: none;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
+/* Responsive Tweaks */
+@media (max-width: 480px) {
+  .wallet-connect-box {
+    padding: 1.5rem 2rem;
   }
-}
 
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
-}
-
-.App-link {
-  color: #61dafb;
-}
-
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
+  .wallet-connect-box h1 {
+    font-size: 1.6rem;
   }
-  to {
-    transform: rotate(360deg);
+
+  .wallet-connect-box button {
+    font-size: 1rem;
   }
 }
