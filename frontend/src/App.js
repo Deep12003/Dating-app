@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react"; 
 import { ethers } from "ethers";
 import "./App.css";
 import DatingAppArtifact from "./DatingApp.json";
 
-const CONTRACT_ADDRESS = "0x689Ed5B65EC1A834DfEFD0e6b767d8eD49c4B08E";
+const CONTRACT_ADDRESS = "0x689Ed5B65EC1A834DfEFD0e6b767d8eD49C4B08E";
 const CONTRACT_ABI = DatingAppArtifact.abi;
 
 function App() {
@@ -243,31 +243,31 @@ function App() {
 
   // Wallet Connect UI when no account connected
   if (!account) {
-  return (
-    <div className="wallet-connect-wrapper">
-      <div className="wallet-connect-box">
-        <h1>Dating DApp</h1>
-        <img
-          src="https://cdn3d.iconscout.com/3d/free/thumb/free-metamask-3d-icon-download-in-png-blend-fbx-gltf-file-formats--blockchain-cryptocurrency-crypto-wallet-software-pack-logos-icons-5326393.png"
-          alt="Dating Illustration"
-          style={{
-            width: "150px",
-            height: "150px",
-            borderRadius: "0%",  // Makes image circular
-            objectFit: "cover",
-            margin: "20px 0",
-          }}
-        />
-        <button onClick={connectWallet}>Connect Wallet</button>
+    return (
+      <div className="wallet-connect-wrapper">
+        <div className="wallet-connect-box">
+          <h1>Dating DApp</h1>
+          <img
+            src="https://cdn3d.iconscout.com/3d/free/thumb/free-metamask-3d-icon-download-in-png-blend-fbx-gltf-file-formats--blockchain-cryptocurrency-crypto-wallet-software-pack-logos-icons-5326393.png"
+            alt="Dating Illustration"
+            style={{
+              width: "150px",
+              height: "150px",
+              borderRadius: "0%",
+              objectFit: "cover",
+              margin: "20px 0",
+            }}
+          />
+          <button onClick={connectWallet}>Connect Wallet</button>
+        </div>
       </div>
-    </div>
-  );
-}
+    );
+  }
 
   // Main App JSX
   return (
     <div className="app-container">
-      <h1>💘 Decentralized Dating DApp</h1>
+      <h1>💘 Dating DApp</h1>
 
       <p><strong>Account:</strong> {account}</p>
 
@@ -281,46 +281,50 @@ function App() {
               <li><strong>Public:</strong> {profile.isPublic ? "Yes" : "No"}</li>
               <li><strong>Active:</strong> {profile.active ? "Yes" : "No"}</li>
             </ul>
-
-            <button
-              onClick={handleDeleteProfile}
-              style={{ marginTop: "10px", backgroundColor: "red", color: "white" }}
-            >
-              Delete Profile
-            </button>
+            <button onClick={handleDeleteProfile}>Delete Profile</button>
           </>
         ) : (
-          <p>No profile found.</p>
+          <p>No profile found. Please set your profile.</p>
         )}
-
-        <div style={{ marginTop: 10 }}>
+        <input
+          type="text"
+          placeholder="Enter IPFS hash"
+          value={ipfsHash}
+          onChange={(e) => setIpfsHash(e.target.value)}
+          style={{ marginRight: "10px" }}
+        />
+        <label>
           <input
-            type="text"
-            placeholder="Enter IPFS Hash"
-            value={ipfsHash}
-            onChange={(e) => setIpfsHash(e.target.value)}
+            type="checkbox"
+            checked={isPublic}
+            onChange={() => setIsPublic(!isPublic)}
+            style={{ marginRight: "5px" }}
           />
-          <label style={{ marginLeft: 10 }}>
-            <input
-              type="checkbox"
-              checked={isPublic}
-              onChange={() => setIsPublic(!isPublic)}
-            />
-            Public Profile
-          </label>
-          <br />
-          <button onClick={handleSetProfile}>Update Profile</button>
-        </div>
+          Make profile public
+        </label>
+        <br />
+        <button onClick={handleSetProfile} style={{ marginTop: "10px" }}>
+          Set / Update Profile
+        </button>
       </section>
 
       <section>
         <h2>Active Users</h2>
         <ul className="user-list">
           {activeUsers.map((user) => (
-            <li key={user}>
-              <strong>{user}</strong> {user.toLowerCase() === account.toLowerCase() && "(You)"}
+            <li key={user} style={{ marginBottom: "20px", borderBottom: "1px solid #ccc", paddingBottom: "10px" }}>
+              <div><strong>{user}</strong> {user.toLowerCase() === account.toLowerCase() && "(You)"}</div>
+
               {user.toLowerCase() !== account.toLowerCase() && (
-                <>
+                <div
+                  style={{
+                    marginTop: "6px",
+                    display: "flex",
+                    flexWrap: "wrap",
+                    gap: "10px",
+                    alignItems: "center",
+                  }}
+                >
                   <button onClick={() => handleLikeUser(user)}>Like</button>
                   <button onClick={() => handleUnlikeUser(user)}>Unlike</button>
                   <button
@@ -337,9 +341,9 @@ function App() {
                     <button onClick={() => handleVerifyUser(user)}>Verify</button>
                   )}
                   {matches.some(match => match.toLowerCase() === user.toLowerCase()) && (
-                    <span style={{ color: "green", marginLeft: 10 }}>Matched</span>
+                    <span style={{ color: "green" }}>Matched</span>
                   )}
-                </>
+                </div>
               )}
             </li>
           ))}
@@ -347,35 +351,67 @@ function App() {
       </section>
 
       <section>
-        <h2>Messages {selectedUser && `with ${selectedUser}`}</h2>
+        <h2>Chat</h2>
         {selectedUser ? (
           <>
-            <div className="chat-box">
+            <p>
+              <strong>Chatting with:</strong> {selectedUser}{" "}
+              <button onClick={() => {
+                setSelectedUser(null);
+                setMessages([]);
+              }}>Close Chat</button>
+            </p>
+            <div className="chat-box" style={{
+              border: "1px solid #ccc",
+              borderRadius: "8px",
+              padding: "10px",
+              maxHeight: "300px",
+              overflowY: "auto",
+              backgroundColor: "#f9f9f9"
+            }}>
               {messages.length === 0 ? (
                 <p>No messages yet.</p>
               ) : (
                 messages.map((msg, idx) => (
                   <div
                     key={idx}
-                    className={`message ${msg.from.toLowerCase() === account.toLowerCase() ? "sent" : "received"}`}
+                    style={{
+                      marginBottom: "8px",
+                      textAlign: msg.from.toLowerCase() === account.toLowerCase() ? "right" : "left",
+                    }}
                   >
-                    <strong>{msg.from.toLowerCase() === account.toLowerCase() ? "You" : msg.from}</strong>: {msg.content}
-                    <br />
-                    <small>{msg.timestamp}</small>
+                    <small>
+                      <strong>{msg.from}</strong> [{msg.timestamp}]
+                    </small>
+                    <div
+                      style={{
+                        backgroundColor: msg.from.toLowerCase() === account.toLowerCase() ? "#d1e7dd" : "#f8d7da",
+                        display: "inline-block",
+                        padding: "6px 10px",
+                        borderRadius: "12px",
+                        maxWidth: "80%",
+                        wordWrap: "break-word",
+                      }}
+                    >
+                      {msg.content}
+                    </div>
                   </div>
                 ))
               )}
             </div>
-            <input
-              type="text"
-              placeholder="Type a message"
-              value={messageInput}
-              onChange={(e) => setMessageInput(e.target.value)}
-            />
-            <button onClick={handleSendMessage}>Send</button>
+            <div style={{ marginTop: "10px" }}>
+              <input
+                type="text"
+                value={messageInput}
+                onChange={(e) => setMessageInput(e.target.value)}
+                placeholder="Type your message"
+                style={{ width: "70%", marginRight: "10px", padding: "6px" }}
+              />
+              <button onClick={handleSendMessage}>Send</button>
+            </div>
           </>
         ) : (
-          <p>Select a user to start chatting.</p>
+          <p>Select a user and click Chat to start messaging.</p>
         )}
       </section>
     </div>
