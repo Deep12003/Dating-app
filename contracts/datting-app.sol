@@ -52,8 +52,6 @@ contract DatingApp {
     event MessageSent(address indexed from, address indexed to, string content);
     event ChatCleared(address indexed user1, address indexed user2);
 
-
-
     address public owner;
 
     modifier onlyOwner() {
@@ -292,12 +290,21 @@ contract DatingApp {
         }
         return result;
     }
+
     function clearChat(address withUser) external hasProfile(msg.sender) hasProfile(withUser) {
-    require(msg.sender != withUser, "Cannot clear chat with yourself");
+        require(msg.sender != withUser, "Cannot clear chat with yourself");
 
-    delete messages[msg.sender][withUser];
-    delete messages[withUser][msg.sender];
+        delete messages[msg.sender][withUser];
+        delete messages[withUser][msg.sender];
 
-    emit ChatCleared(msg.sender, withUser); 
+        emit ChatCleared(msg.sender, withUser); 
+    }
+
+    function getProfileImage(address user) external view returns (string memory) {
+        require(profiles[user].active, "Profile not active");
+        require(!blacklist[user], "User is blacklisted");
+        require(profiles[user].isPublic || msg.sender == user, "Profile is private");
+
+        return profiles[user].ipfsHash;
     }
 }
