@@ -5,6 +5,8 @@ import DatingAppArtifact from "./DatingApp.json";
 
 const CONTRACT_ADDRESS = "0x6760860a1dF20098D65Ae3649b37751a35b7A0cE";
 const CONTRACT_ABI = DatingAppArtifact.abi;
+const PINATA_API_KEY = '12ae84e777956c6c830c';
+const PINATA_API_SECRET = '08ae6d9ceeb028636da754ee2fd641715f67678cc9c05bb1f12240bb22be87c4';
 
 function App() {
   const [provider, setProvider] = useState(null);
@@ -21,6 +23,9 @@ function App() {
   const [messages, setMessages] = useState([]);
   const [messageInput, setMessageInput] = useState("");
   const [isOwner, setIsOwner] = useState(false);
+  const [profileImage, setProfileImage] = useState(null);
+  const [selectedFile, setSelectedFile] = React.useState(null);
+  
   const connectWallet = async () => {
     if (!window.ethereum) {
       alert("Please install MetaMask to continue.");
@@ -266,6 +271,70 @@ const handleClearChat = async () => {
     }
   };
 
+  const handleTransferOwnership = async () => {
+  const newOwner = prompt("Enter the new owner address:");
+  if (!newOwner) return alert("New owner address is required.");
+
+  try {
+    const tx = await contract.transferOwnership(newOwner);
+    await tx.wait();
+    alert(`Ownership transferred to ${newOwner}`);
+    // Re-check ownership status after transfer
+    const ownerAddress = await contract.owner();
+    setIsOwner(ownerAddress.toLowerCase() === account.toLowerCase());
+  } catch (error) {
+    alert("Error transferring ownership: " + (error?.data?.message || error.message));
+  }
+};
+const handleUploadImage = async () => {
+  if (!selectedFile) {
+    alert("Please select a file first");
+    return;
+  }
+
+  try {
+    // Call the reusable upload function here
+    const ipfsHash = await uploadToPinata(selectedFile);
+
+    setIpfsHash(ipfsHash);
+    await handleSetProfile(ipfsHash);
+
+    alert("Image uploaded and profile updated!");
+  } catch (error) {
+    console.error("Error uploading image:", error);
+    alert("Error uploading image");
+  }
+};
+
+
+async function uploadToPinata(file) {
+  try {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const response = await fetch("https://api.pinata.cloud/pinning/pinFileToIPFS", {
+      method: "POST",
+      headers: {
+        pinata_api_key: PINATA_API_KEY,
+        pinata_secret_api_key: PINATA_API_SECRET,
+        // Do NOT set 'Content-Type' header here!
+      },
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(errorText);
+    }
+
+    const data = await response.json();
+    return data.IpfsHash;
+  } catch (error) {
+    console.error("Failed to upload image to IPFS:", error);
+    throw error;
+  }
+}
+
   useEffect(() => {
     if (!contract || !account) return;
     const id = setInterval(() => {
@@ -309,46 +378,80 @@ const handleClearChat = async () => {
  
   return (
     <div className="app-container">
-      <h1>💘 Dating DApp</h1>
+      <h1> Dating DApp 💘</h1>
 
       <p><strong>Account:</strong> {account}</p>
 
       <section>
-        <h2>Your Profile</h2>
-        {profile ? (
-          <>
-            <ul>
-              <li><strong>IPFS Hash:</strong> {profile.ipfsHash}</li>
-              <li><strong>Verified:</strong> {profile.verified ? "Yes" : "No"}</li>
-              <li><strong>Public:</strong> {profile.isPublic ? "Yes" : "No"}</li>
-              <li><strong>Active:</strong> {profile.active ? "Yes" : "No"}</li>
-            </ul>
-            <button onClick={handleDeleteProfile}>Delete Profile</button>
-          </>
-        ) : (
-          <p>No profile found. Please set your profile.</p>
-        )}
-        <input
-          type="text"
-          placeholder="Enter IPFS hash"
-          value={ipfsHash}
-          onChange={(e) => setIpfsHash(e.target.value)}
-          style={{ marginRight: "10px" }}
+  <h2>Your Profile</h2>
+  {profile ? (
+    <>
+      <ul>
+        <li><strong>IPFS Hash:</strong> {profile.ipfsHash}</li>
+        <li><strong>Verified:</strong> {profile.verified ? "Yes" : "No"}</li>
+        <li><strong>Public:</strong> {profile.isPublic ? "Yes" : "No"}</li>
+        <li><strong>Active:</strong> {profile.active ? "Yes" : "No"}</li>
+      </ul>
+
+      {profile.ipfsHash && (
+  <img 
+    src={`https://gateway.pinata.cloud/ipfs/${profile.ipfsHash}`} 
+    alt="Profile Image" 
+    style={{ width: 150, height: 150, borderRadius: "50%" }}
+  />
+)}
+
+      {/* Display profile image if exists */}
+      {profile.ipfsHash && (
+        <img
+          src={`https://gateway.pinata.cloud/ipfs/${profile.ipfsHash}`}
+          alt="Profile Image"
+          style={{ width: 150, height: 150, borderRadius: "50%", marginBottom: "10px" }}
         />
-        <label>
-          <input
-            type="checkbox"
-            checked={isPublic}
-            onChange={() => setIsPublic(!isPublic)}
-            style={{ marginRight: "5px" }}
-          />
-          Make profile public
-        </label>
-        <br />
-        <button onClick={handleSetProfile} style={{ marginTop: "10px" }}>
-          Set / Update Profile
-        </button>
-      </section>
+      )}
+
+      <button onClick={handleDeleteProfile}>Delete Profile</button>
+    </>
+  ) : (
+    <p>No profile found. Please set your profile.</p>
+  )}
+
+  {/* File input for uploading new profile image */}
+  <input
+    type="file"
+    accept="image/*"
+    onChange={(e) => setSelectedFile(e.target.files[0])}
+    style={{ marginTop: "15px" }}
+  />
+
+  <button onClick={handleUploadImage} style={{ marginTop: "10px" }}>
+    Upload & Update Profile Image
+  </button>
+
+  <hr style={{ margin: "20px 0" }} />
+
+  {/* Optional: You can still keep your manual IPFS hash input and public toggle */}
+  <input
+    type="text"
+    placeholder="Enter IPFS hash"
+    value={ipfsHash}
+    onChange={(e) => setIpfsHash(e.target.value)}
+    style={{ marginRight: "10px" }}
+  />
+  <label>
+    <input
+      type="checkbox"
+      checked={isPublic}
+      onChange={() => setIsPublic(!isPublic)}
+      style={{ marginRight: "5px" }}
+    />
+    Make profile public
+  </label>
+  <br />
+  <button onClick={handleSetProfile} style={{ marginTop: "10px" }}>
+    Set / Update Profile
+  </button>
+</section>
 
       <section>
         <h2>Active Users</h2>
