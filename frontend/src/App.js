@@ -47,6 +47,18 @@ function App() {
       alert("Error connecting wallet: " + error.message);
     }
   };
+  const handleDeleteProfilePic = async () => {
+  try {
+    // Call your smart contract or backend to delete/reset the profile pic hash
+    await handleSetProfile("");  // Pass empty string or null based on your contract
+    setIpfsHash(null);          // Clear the local state so user can upload again
+    alert("Profile picture deleted. You can upload a new one now.");
+  } catch (error) {
+    console.error("Failed to delete profile picture:", error);
+    alert("Failed to delete profile picture");
+  }
+};
+
 
   useEffect(() => {
     const checkOwner = async () => {
@@ -132,20 +144,6 @@ const loadAppData = async () => {
       setIpfsHash("");
     } catch (error) {
       alert("Failed to set profile: " + (error?.data?.message || error.message));
-    }
-  };
-
-  const handleDeleteProfile = async () => {
-    if (!window.confirm("Are you sure you want to delete your profile? This action cannot be undone.")) return;
-    try {
-      const tx = await contract.deleteProfile();
-      await tx.wait();
-      alert("Profile deleted.");
-      setProfile(null);
-      setIpfsHash("");
-      loadAppData();
-    } catch (error) {
-      alert("Error deleting profile: " + (error?.data?.message || error.message));
     }
   };
 
@@ -334,6 +332,18 @@ async function uploadToPinata(file) {
     throw error;
   }
 }
+const handleDeleteProfile = async () => {
+  try {
+    await handleSetProfile("");  // clears profile image hash on blockchain/backend
+    setIpfsHash("");
+    alert("Profile image deleted.");
+    // refresh profile data if needed
+  } catch (error) {
+    console.error("Delete failed", error);
+    alert("Failed to delete profile image.");
+  }
+};
+
 
   useEffect(() => {
     if (!contract || !account) return;
@@ -382,8 +392,9 @@ async function uploadToPinata(file) {
 
       <p><strong>Account:</strong> {account}</p>
 
-      <section>
+     <section>
   <h2>Your Profile</h2>
+
   {profile ? (
     <>
       <ul>
@@ -393,15 +404,7 @@ async function uploadToPinata(file) {
         <li><strong>Active:</strong> {profile.active ? "Yes" : "No"}</li>
       </ul>
 
-      {profile.ipfsHash && (
-  <img 
-    src={`https://gateway.pinata.cloud/ipfs/${profile.ipfsHash}`} 
-    alt="Profile Image" 
-    style={{ width: 150, height: 150, borderRadius: "50%" }}
-  />
-)}
-
-      {/* Display profile image if exists */}
+      {/* Show profile image only once */}
       {profile.ipfsHash && (
         <img
           src={`https://gateway.pinata.cloud/ipfs/${profile.ipfsHash}`}
@@ -410,27 +413,32 @@ async function uploadToPinata(file) {
         />
       )}
 
-      <button onClick={handleDeleteProfile}>Delete Profile</button>
+      {/* Button to delete profile image */}
+      <button onClick={handleDeleteProfile}>Delete Profile Image</button>
     </>
   ) : (
     <p>No profile found. Please set your profile.</p>
   )}
 
-  {/* File input for uploading new profile image */}
-  <input
-    type="file"
-    accept="image/*"
-    onChange={(e) => setSelectedFile(e.target.files[0])}
-    style={{ marginTop: "15px" }}
-  />
+  {/* Show file input & upload button only if no profile image uploaded yet */}
+  {!profile?.ipfsHash && (
+    <>
+      <input
+        type="file"
+        accept="image/*"
+        onChange={(e) => setSelectedFile(e.target.files[0])}
+        style={{ marginTop: "15px" }}
+      />
 
-  <button onClick={handleUploadImage} style={{ marginTop: "10px" }}>
-    Upload & Update Profile Image
-  </button>
+      <button onClick={handleUploadImage} style={{ marginTop: "10px" }}>
+        Upload & Update Profile Image
+      </button>
+    </>
+  )}
 
   <hr style={{ margin: "20px 0" }} />
 
-  {/* Optional: You can still keep your manual IPFS hash input and public toggle */}
+  {/* Manual IPFS hash input and public toggle */}
   <input
     type="text"
     placeholder="Enter IPFS hash"
@@ -452,6 +460,7 @@ async function uploadToPinata(file) {
     Set / Update Profile
   </button>
 </section>
+
 
       <section>
         <h2>Active Users</h2>
