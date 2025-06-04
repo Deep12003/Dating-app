@@ -360,6 +360,15 @@ const handleDeleteProfile = async () => {
     }, 3000);
     return () => clearInterval(id);
   }, [contract, account, selectedUser]);
+useEffect(() => {
+  const checkOwner = async () => {
+    if (!contract || !account) return;
+    const ownerAddress = await contract.owner();
+    setIsOwner(ownerAddress.toLowerCase() === account.toLowerCase());
+  };
+
+  checkOwner();
+}, [contract, account]);
 
   
 
@@ -393,6 +402,7 @@ const handleDeleteProfile = async () => {
       <p><strong>Account:</strong> {account}</p>
 
      <section>
+     
   <h2>Your Profile</h2>
 
   {profile ? (
@@ -459,6 +469,11 @@ const handleDeleteProfile = async () => {
   <button onClick={handleSetProfile} style={{ marginTop: "10px" }}>
     Set / Update Profile
   </button>
+  {isOwner && (
+  <button onClick={handleTransferOwnership} className="bg-blue-500 text-white px-4 py-2 rounded">
+    Transfer Ownership
+  </button>
+)}
 </section>
 
 
