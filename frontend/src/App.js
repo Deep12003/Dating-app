@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react"; 
 import { ethers } from "ethers";
+
 import "./App.css";
 import DatingAppArtifact from "./DatingApp.json";
 
@@ -269,21 +270,26 @@ const handleClearChat = async () => {
     }
   };
 
-  const handleTransferOwnership = async () => {
+const handleTransferOwnership = async () => {
   const newOwner = prompt("Enter the new owner address:");
   if (!newOwner) return alert("New owner address is required.");
 
   try {
     const tx = await contract.transferOwnership(newOwner);
     await tx.wait();
+
     alert(`Ownership transferred to ${newOwner}`);
-    // Re-check ownership status after transfer
+
+    // Fetch the latest owner from contract again
     const ownerAddress = await contract.owner();
+
+    // Update your isOwner state: check if current connected account is new owner
     setIsOwner(ownerAddress.toLowerCase() === account.toLowerCase());
   } catch (error) {
     alert("Error transferring ownership: " + (error?.data?.message || error.message));
   }
 };
+
 const handleUploadImage = async () => {
   if (!selectedFile) {
     alert("Please select a file first");
@@ -344,6 +350,36 @@ const handleDeleteProfile = async () => {
   }
 };
 
+useEffect(() => {
+  const init = async () => {
+    if (!window.ethereum) {
+      alert("MetaMask is not installed.");
+      return;
+    }
+
+    try {
+      const web3Provider = new ethers.BrowserProvider(window.ethereum);
+      const userSigner = await web3Provider.getSigner();
+      const userAddress = await userSigner.getAddress();
+
+      const instance = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, userSigner);
+
+      setProvider(web3Provider);
+      setSigner(userSigner);
+      setContract(instance);
+      setAccount(userAddress);
+
+      const ownerAddress = await instance.owner();
+      setIsOwner(ownerAddress.toLowerCase() === userAddress.toLowerCase());
+    } catch (error) {
+      console.error("DApp initialization failed:", error);
+      alert("Failed to initialize the app.");
+    }
+  };
+
+  init();
+}, []);
+
 
   useEffect(() => {
     if (!contract || !account) return;
@@ -360,15 +396,6 @@ const handleDeleteProfile = async () => {
     }, 3000);
     return () => clearInterval(id);
   }, [contract, account, selectedUser]);
-useEffect(() => {
-  const checkOwner = async () => {
-    if (!contract || !account) return;
-    const ownerAddress = await contract.owner();
-    setIsOwner(ownerAddress.toLowerCase() === account.toLowerCase());
-  };
-
-  checkOwner();
-}, [contract, account]);
 
   
 
@@ -402,7 +429,6 @@ useEffect(() => {
       <p><strong>Account:</strong> {account}</p>
 
      <section>
-     
   <h2>Your Profile</h2>
 
   {profile ? (
@@ -470,10 +496,8 @@ useEffect(() => {
     Set / Update Profile
   </button>
   {isOwner && (
-  <button onClick={handleTransferOwnership} className="bg-blue-500 text-white px-4 py-2 rounded">
-    Transfer Ownership
-  </button>
-)}
+        <button onClick={handleTransferOwnership}>Transfer Ownership</button>
+      )}
 </section>
 
 
