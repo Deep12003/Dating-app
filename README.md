@@ -6,6 +6,7 @@
 - [Project Vision](#project-vision)
 - [Future Scope](#future-scope)
 - [Key Features](#key-features)
+- [How It Works](#️-how-it-works)
 - [Frontend Showcase](#frontend-showcase)
 - [Contract Address](#contract-address)
 
@@ -17,12 +18,20 @@
 ---
 
 ## Project Description
-This decentralized dating application leverages blockchain technology to create a secure, transparent, and trustless environment for users to create profiles, find matches, and communicate. By using Ethereum smart contracts and IPFS for storing profile metadata, the app ensures data integrity, privacy, and ownership.
+In today’s online dating landscape, users are plagued with fake profiles, data leaks, and manipulation from centralized services. **DecentraDate** is designed to change this by leveraging Ethereum smart contracts and decentralized storage (IPFS) to build a fully trustless and self-sovereign dating platform.
+
+Users create and manage their profiles with full control over their data, match with others through smart contract-based algorithms, and engage in secure, encrypted conversations — all with the peace of mind that no centralized authority owns or manipulates their information.
+
 
 ---
 
 ## Project Vision
-Our vision is to empower users with full control over their dating profiles and data, eliminating intermediaries and centralized authorities. The platform aims to foster genuine connections with verifiable profiles while maintaining privacy and security in a decentralized ecosystem.
+- **Trustless Identity**: Leverage wallet-based identity to eliminate fake users.
+- **User Data Sovereignty**: Let users retain complete control over their personal data.
+- **Verified Interactions**: Facilitate secure and authentic conversations between matched users.
+- **Global & Censorship-Resistant**: Remove geographic and systemic barriers in digital dating.
+- **Privacy by Design**: Build love connections without sacrificing user privacy.
+
 
 ---
 
@@ -40,14 +49,27 @@ Our vision is to empower users with full control over their dating profiles and 
 
 ## Key Features
 
-- **Wallet-Based Authentication:** Seamless login via MetaMask or compatible Ethereum wallets.  
-- **Decentralized Profile Management:** Create and update profiles with metadata securely stored on IPFS.  
-- **Privacy Controls:** Users can choose to make their profiles public or private, ensuring full control over data visibility.  
-- **Admin Verification:** Verified profiles to promote authenticity and trust within the community.  
-- **Matchmaking System:** On-chain like, unlike, and match functionalities to foster genuine connections.  
-- **Real-Time Messaging:** Secure, decentralized chat enabling direct communication between matched users.  
-- **User Moderation:** Block and unblock users to enhance safety and user experience.  
-- **Transparency and Security:** Critical user interactions are recorded on-chain for data integrity and trustlessness.
+| Feature | Description |
+|--------|-------------|
+| **Decentralized User Profiles** | All profiles are stored off-chain on IPFS and referenced on-chain via smart contracts. |
+| **Smart Matching Algorithm** | Find potential matches based on user-defined preferences such as age, gender, and interests. |
+| **End-to-End Chat System** | Support secure, session-based messaging with encrypted front-end storage. |
+| **Wallet-Based Sign In** | Authenticate using MetaMask or WalletConnect — no emails or phone numbers needed. |
+| **Profile Verification** | Verify user authenticity using on-chain wallet address binding. |
+| **Full Profile Control** | Users can edit or delete their profile at any time. |
+| **Elegant UI** | Built with a soft romantic pastel palette for a cozy dating experience. |
+
+
+---
+---
+
+## How It Works
+
+1. **Connect Wallet** — via MetaMask or WalletConnect.
+2. **Create Profile** — all details are stored on IPFS; reference is stored on-chain.
+3. **Explore Matches** — view other profiles, like them, or pass.
+4. **Match & Chat** — if both users like each other, chat functionality is enabled.
+5. **Edit/Delete Profile** — modify or remove profile at any time with on-chain and IPFS sync.
 
 ---
 
