@@ -89,7 +89,8 @@ https://github.com/user-attachments/assets/bebe1605-5518-4439-b3a4-65a62320ab76
 
 ### 2. Your Profile 
 
-![image](https://github.com/user-attachments/assets/34f85f91-2734-4a75-8346-68d8ea9326d0)
+![image](https://github.com/user-attachments/assets/c0220aaf-d047-4983-b9a8-9e553a122bf3)
+
 
 
 ### 3. Active User
